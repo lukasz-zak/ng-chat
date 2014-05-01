@@ -1,0 +1,17 @@
+<a href="/">Home</a>
+
+<h1>{{title}}</h1>
+
+
+<div class="msgWindow shadow">
+  <span class="allMsg" ng-repeat="msg in messages">
+    <code>{{msg.time | date:'HH:mm:ss'}}</code>
+    <b>{{msg.author}}:</b>
+    <span>{{msg.content}}</span>
+  </span>
+</div>
+<div>
+  <form ng-submit="sendMsg(msg)">
+    <input class="msgInput" type="text" ng-model="msg.content"/>
+  </form>
+</div>
