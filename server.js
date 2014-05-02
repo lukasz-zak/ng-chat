@@ -1,3 +1,5 @@
+'use strict';
+
 var gzippo = require('gzippo');
 var express = require('express');
 var morgan  = require('morgan');
@@ -5,19 +7,25 @@ var Pusher = require('pusher');
 var bodyParser = require('body-parser');
 var app = express();
 
+var pathLocation = '';
+
 app.use(morgan('dev'));
 
 if(process.env.ENV && process.env.ENV === 'PROD'){
-  app.use(gzippo.staticGzip("" + __dirname + "/dist"));
+  pathLocation = __dirname + '/';
+  app.use(gzippo.staticGzip(pathLocation));
 } else {
-  app.use(gzippo.staticGzip("" + __dirname + "/app"));
-  app.use(gzippo.staticGzip("" + __dirname + "/.tmp"));
+  app.use(require('connect-livereload')());
+  pathLocation = __dirname + '/app';
+  app.use(gzippo.staticGzip(pathLocation));
+  app.use(gzippo.staticGzip(__dirname + '/.tmp'));
 }
 
+console.log('location', pathLocation);
 app.use(bodyParser());
 
 app.get('/', function (req, res){
-  res.sendfile(__dirname + '/app/index.html');
+  res.sendfile(pathLocation + '/index.html');
 });
 
 var pusher = new Pusher({

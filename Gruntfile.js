@@ -25,6 +25,30 @@ module.exports = function (grunt) {
       dist: 'dist'
     },
 
+    express: {
+      options: {
+        port: process.env.PORT || 9000
+      },
+      dev: {
+        options: {
+          script: 'server.js',
+          debug : true
+        }
+      },
+      prod: {
+        options: {
+          script: 'server.js',
+          'node_env': 'production'
+        }
+      }
+    },
+
+    open: {
+      server: {
+        url: 'http://localhost:<%= express.options.port %>'
+      }
+    },
+
     // Watches files for changes and runs tasks based on the changed files
     watch: {
       bower: {
@@ -51,46 +75,23 @@ module.exports = function (grunt) {
       },
       livereload: {
         options: {
-          livereload: '<%= connect.options.livereload %>'
+          livereload : true
         },
         files: [
           '<%= yeoman.app %>/{,*/}*.html',
           '.tmp/styles/{,*/}*.css',
+          '{.tmp,<%= yeoman.app %>}/scripts/{,*//*}*.js',
           '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
         ]
-      }
-    },
-
-    // The actual grunt server settings
-    connect: {
-      options: {
-        port: 9000,
-        // Change this to '0.0.0.0' to access the server from outside.
-        hostname: 'localhost',
-        livereload: 35729
       },
-      livereload: {
+      express: {
+        files: [
+          'server.js'
+        ],
+        tasks: ['express:dev'],
         options: {
-          open: true,
-          base: [
-            '.tmp',
-            '<%= yeoman.app %>'
-          ]
-        }
-      },
-      test: {
-        options: {
-          port: 9001,
-          base: [
-            '.tmp',
-            'test',
-            '<%= yeoman.app %>'
-          ]
-        }
-      },
-      dist: {
-        options: {
-          base: '<%= yeoman.dist %>'
+          livereload: true,
+          nospawn: true //Without this option specified express won't be reloaded
         }
       }
     },
@@ -318,7 +319,7 @@ module.exports = function (grunt) {
           expand : true,
           cwd : './',
           dest : 'heroku',
-          src : 'server.js'
+          src : ['server.js', 'package.json']
         }, {
           expand: true,
           dest: '<%= yeoman.dist %>',
@@ -326,7 +327,7 @@ module.exports = function (grunt) {
           src: '*',
           rename: function (dest, src) {
             var path = require('path');
-            if (src === 'distpackage.json') {
+            if (src === 'package.json') {
               return path.join(dest, 'package.json');
             }
             return path.join(dest, src);
@@ -402,7 +403,8 @@ module.exports = function (grunt) {
       'bowerInstall',
       'concurrent:server',
       'autoprefixer',
-      'connect:livereload',
+      'express:dev',
+      'open',
       'watch'
     ]);
   });
@@ -416,7 +418,6 @@ module.exports = function (grunt) {
     'clean:server',
     'concurrent:test',
     'autoprefixer',
-    'connect:test',
     'karma'
   ]);
 
